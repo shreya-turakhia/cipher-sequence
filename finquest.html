@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Case File: Market Cipher — Round 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=Special+Elite&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#06080c;--ink2:#0e1118;--ink3:#161b26;
+  --wire:#1d2335;--wire2:#28304a;
+  --au:#c9a84c;--au2:#f0cb6a;--au3:#7a621e;
+  --cy:#18d4c0;--sc:#e84040;--em:#22c97a;
+  --tx:#d8e0f0;--tx2:#7880a0;--tx3:#333d5a;
+  --paper:#f5eedc;--paper2:#e8dfc2;--paper3:#d4c99a;
+  --ink-paper:#1a1208;
+  --hd:'Bebas Neue',sans-serif;
+  --mn:'IBM Plex Mono',monospace;
+  --sf:'Special Elite',cursive;
+  --pf:'Playfair Display',serif;
+}
+html,body{height:100%;background:var(--ink);color:var(--tx);font-family:var(--mn);overflow-x:hidden}
+
+body::before{content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:.025;pointer-events:none;z-index:9999}
+body::after{content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 4px);
+  pointer-events:none;z-index:9998}
+
+/* NAV */
+#nav{position:fixed;top:0;left:0;right:0;height:52px;
+  background:rgba(6,8,12,.96);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--wire);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;z-index:600}
+.brand{font-family:var(--hd);font-size:18px;letter-spacing:.14em;color:var(--au)}
+#clock{font-family:var(--hd);font-size:22px;color:var(--cy);letter-spacing:.08em;display:none;
+  text-shadow:0 0 20px rgba(24,212,192,.4)}
+#step-dots{display:flex;gap:5px}
+.sd{width:24px;height:3px;border-radius:2px;background:var(--wire);transition:.4s}
+.sd.act{background:var(--au);box-shadow:0 0 10px var(--au)}
+.sd.dn{background:var(--em)}
+#team-pill{font-size:11px;color:var(--au);background:rgba(201,168,76,.08);
+  border:1px solid rgba(201,168,76,.25);border-radius:20px;padding:4px 12px;
+  letter-spacing:.1em;display:none}
+
+/* TICKER */
+#tkr{position:fixed;top:52px;left:0;right:0;height:26px;
+  background:var(--ink2);border-bottom:1px solid var(--wire);
+  overflow:hidden;z-index:599}
+.tkline{display:inline-flex;gap:44px;white-space:nowrap;padding-top:5px;
+  animation:tkr 30s linear infinite;font-size:11px;color:var(--tx3)}
+.tkline .up{color:var(--em)}.tkline .dn{color:var(--sc)}
+@keyframes tkr{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* STAGE */
+#stage{padding-top:100px;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.screen{display:none;width:100%;max-width:900px;padding:28px 22px 100px;animation:fadeup .5s ease both}
+.screen.on{display:block}
+@keyframes fadeup{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* URL BAR */
+#urlbar{position:fixed;bottom:0;left:0;right:0;height:36px;
+  background:rgba(6,8,12,.96);border-top:1px solid var(--wire);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:var(--tx3);z-index:600}
+#urlbar.ok{border-top-color:rgba(34,201,122,.35);color:var(--em)}
+#urlbar.bad{border-top-color:rgba(232,64,64,.35);color:var(--sc)}
+
+/* LANDING */
+.land{border:1px solid var(--wire);border-radius:16px;background:var(--ink2);overflow:hidden}
+.land-banner{height:280px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#0a0e14 0%,#0d1220 50%,#0a1008 100%)}
+.land-grid{position:absolute;inset:0;
+  background-image:linear-gradient(rgba(201,168,76,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(201,168,76,.04) 1px,transparent 1px);
+  background-size:50px 50px}
+.land-title{position:absolute;bottom:24px;left:36px;
+  font-family:var(--hd);font-size:72px;line-height:.88;
+  letter-spacing:.04em;color:var(--au);
+  text-shadow:0 0 60px rgba(201,168,76,.2)}
+.land-tag{position:absolute;top:24px;right:24px;
+  font-size:10px;letter-spacing:.2em;color:var(--au3);
+  background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.15);
+  border-radius:4px;padding:4px 10px;text-transform:uppercase}
+.land-body{padding:36px 40px}
+.land-body p{font-size:13px;color:var(--tx2);line-height:1.8;max-width:520px;margin-bottom:24px}
+.kpis{display:flex;gap:12px;margin-bottom:28px;flex-wrap:wrap}
+.kpi{flex:1;min-width:100px;background:var(--ink3);border:1px solid var(--wire);
+  border-radius:10px;padding:14px 16px}
+.kpi-n{font-family:var(--hd);font-size:28px;color:var(--au)}
+.kpi-l{font-size:10px;letter-spacing:.16em;color:var(--tx2);text-transform:uppercase;margin-top:2px}
+.code-wrap{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.code-wrap label{font-size:12px;color:var(--tx2);letter-spacing:.12em;text-transform:uppercase}
+#team-input{font-family:var(--hd);font-size:24px;letter-spacing:.2em;
+  width:120px;background:var(--ink3);border:1px solid var(--wire2);
+  border-radius:8px;padding:10px 14px;color:var(--au);outline:none;
+  text-transform:uppercase;transition:.2s}
+#team-input:focus{border-color:var(--au)}
+#team-err{font-size:11px;color:var(--sc);display:none}
+
+/* PUZZLE SHELL */
+.ptag{display:inline-flex;align-items:center;gap:8px;
+  font-size:10px;letter-spacing:.2em;color:var(--au);
+  background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.18);
+  border-radius:20px;padding:4px 14px;text-transform:uppercase;margin-bottom:14px}
+.pglob{width:8px;height:8px;border-radius:50%;background:var(--au);
+  box-shadow:0 0 8px var(--au);animation:pulse 1.4s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pvis{border:1px solid var(--wire);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.instr{background:var(--ink3);border:1px solid var(--wire);border-left:3px solid var(--au);
+  border-radius:0 10px 10px 0;padding:14px 18px;
+  margin-bottom:14px;font-size:13px;color:var(--tx2);line-height:1.7}
+.instr strong{color:var(--tx)}
+.arow{display:flex;gap:8px}
+.apre{font-size:11px;color:var(--tx3);background:var(--ink3);
+  border:1px solid var(--wire);border-radius:8px;padding:11px 12px;
+  white-space:nowrap;display:flex;align-items:center}
+.arow input{flex:1;font-family:var(--mn);font-size:14px;
+  background:var(--ink3);border:1px solid var(--wire2);
+  border-radius:8px;padding:11px 14px;color:var(--tx);outline:none;transition:.2s}
+.arow input:focus{border-color:var(--au);box-shadow:0 0 0 2px rgba(201,168,76,.1)}
+.arow input.shk{animation:shk .4s ease}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(7px)}}
+.gobtn{font-family:var(--hd);font-size:15px;letter-spacing:.1em;
+  background:var(--au);color:var(--ink);border:none;border-radius:8px;
+  padding:11px 26px;cursor:pointer;transition:.2s;white-space:nowrap}
+.gobtn:hover{background:var(--au2)}.gobtn:active{transform:scale(.97)}
+.gobtn:disabled{opacity:.4;cursor:not-allowed}
+.fb{font-size:12px;margin-top:8px;min-height:18px}
+.fb.ok{color:var(--em)}.fb.er{color:var(--sc)}
+.wct{font-size:11px;color:var(--tx3);margin-top:5px}
+.hint-btn{background:none;border:none;color:var(--tx3);font-family:var(--mn);
+  font-size:11px;cursor:pointer;margin-top:10px;text-decoration:underline;text-underline-offset:3px}
+.hint-btn:hover{color:var(--tx2)}
+.hbox{display:none;margin-top:8px;padding:12px 16px;
+  background:rgba(201,168,76,.05);border:1px dashed rgba(201,168,76,.22);
+  border-radius:8px;font-size:12px;color:var(--au);line-height:1.65}
+.hbox.open{display:block}
+
+/* ── PUZZLE 1: NEWSPAPER ── */
+.newspaper{background:var(--paper);color:var(--ink-paper);
+  font-family:var(--pf);padding:28px 32px;position:relative;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E")}
+.np-masthead{text-align:center;border-bottom:3px double #5a4a28;padding-bottom:10px;margin-bottom:10px}
+.np-masthead h1{font-size:42px;font-family:var(--pf);font-weight:700;letter-spacing:.02em;color:#1a1208}
+.np-meta{display:flex;justify-content:space-between;font-size:10px;font-family:var(--mn);
+  color:#6a5a38;margin-bottom:12px;border-bottom:1px solid #c4b488;padding-bottom:8px}
+.np-headline{font-size:28px;font-weight:700;line-height:1.1;margin-bottom:10px;color:#1a1208;
+  border-bottom:2px solid #8a7a50;padding-bottom:8px}
+.np-subhead{font-size:13px;font-style:italic;color:#4a3a20;margin-bottom:14px}
+.np-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.np-body{font-size:12px;line-height:1.7;color:#2a2010;font-family:var(--sf)}
+.np-body p{margin-bottom:8px}
+.np-riddle{background:rgba(90,74,40,.08);border:1px dashed rgba(90,74,40,.3);
+  border-radius:4px;padding:12px 16px;margin:12px 0;
+  font-family:var(--mn);font-size:12px;color:#3a2c10;line-height:1.7}
+.np-riddle strong{color:#8a6a20;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.redacted{background:#1a1208;color:transparent;border-radius:2px;user-select:none;
+  display:inline-block;min-width:80px}
+.drop-cap::first-letter{float:left;font-size:48px;line-height:.8;font-weight:700;
+  margin:2px 5px 0 0;color:#5a4a28}
+.np-photo{width:100%;height:120px;background:#d4c99a;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:#8a7a50;font-family:var(--mn);
+  border:1px solid #c4b488;margin-bottom:8px;position:relative;overflow:hidden}
+.np-caption{font-size:10px;color:#6a5a38;font-style:italic;font-family:var(--sf)}
+
+/* ── PUZZLE 2: CROSSWORD ── */
+.xword-wrap{background:#0d1020;padding:20px;position:relative}
+.xword-title{font-family:var(--hd);font-size:16px;letter-spacing:.2em;color:var(--au);
+  margin-bottom:16px;text-align:center}
+.xword-grid{display:inline-flex;flex-direction:column;gap:2px;
+  background:var(--wire);border:2px solid var(--wire2);padding:2px}
+.xword-row{display:flex;gap:2px}
+.xw-cell{width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--hd);font-size:20px;letter-spacing:.05em;
+  position:relative;font-weight:600}
+.xw-cell.blk{background:#000}
+.xw-cell.wht{background:#f5eedc;color:#1a1208}
+.xw-cell.mis{background:rgba(201,168,76,.12);border:1px solid var(--au);color:var(--au)}
+.xw-cell.hi{background:rgba(24,212,192,.1);border:1px solid rgba(24,212,192,.5);color:var(--cy)}
+.xw-num{position:absolute;top:2px;left:3px;font-size:9px;font-family:var(--mn);
+  color:rgba(26,18,8,.5);font-weight:400;line-height:1}
+.xw-cell.mis .xw-num{color:rgba(201,168,76,.6)}
+.xword-clues{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;font-size:11px}
+.clue-group h3{font-family:var(--hd);font-size:12px;letter-spacing:.2em;color:var(--au);margin-bottom:8px}
+.clue-item{display:flex;gap:8px;margin-bottom:5px;color:var(--tx2);line-height:1.5}
+.clue-n{color:var(--au);min-width:20px;font-weight:600}
+.xword-answer{margin-top:16px;padding:12px 16px;
+  background:rgba(24,212,192,.05);border:1px solid rgba(24,212,192,.2);border-radius:8px}
+.xword-answer p{font-size:11px;color:var(--tx3);margin-bottom:8px}
+.xw-extract{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.xw-box{width:32px;height:32px;border:1px solid var(--cy);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--hd);font-size:18px;color:var(--cy);background:rgba(24,212,192,.05)}
+.xw-box.blank{border-style:dashed;color:transparent;background:rgba(24,212,192,.03)}
+.xw-sep{color:var(--tx3);font-size:18px}
+
+/* ── PUZZLE 3: CHAT ── */
+.chat-shell{background:#0d1520;border-radius:12px;overflow:hidden}
+.chat-header{background:#111d2a;padding:14px 20px;border-bottom:1px solid var(--wire);
+  display:flex;align-items:center;gap:14px}
+.chat-avatars{display:flex}
+.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--hd);font-size:16px;border:2px solid var(--wire2)}
+.avatar:nth-child(2){margin-left:-12px}
+.chat-header-text{flex:1}
+.chat-header-text h3{font-size:13px;color:var(--tx);font-weight:600}
+.chat-header-text p{font-size:10px;color:var(--tx3)}
+.chat-secure{font-size:9px;color:var(--em);letter-spacing:.1em;
+  background:rgba(34,201,122,.08);border:1px solid rgba(34,201,122,.2);
+  border-radius:20px;padding:2px 8px}
+.chat-body{padding:20px;display:flex;flex-direction:column;gap:14px;max-height:340px;overflow-y:auto}
+.msg{max-width:76%;display:flex;flex-direction:column;gap:4px}
+.msg.right{align-self:flex-end;align-items:flex-end}
+.msg.left{align-self:flex-start}
+.msg-sender{font-size:10px;color:var(--tx3);padding:0 4px}
+.msg-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6}
+.msg.left .msg-bubble{background:var(--ink3);border:1px solid var(--wire);color:var(--tx2);
+  border-radius:4px 12px 12px 12px}
+.msg.right .msg-bubble{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);
+  color:var(--tx);border-radius:12px 4px 12px 12px}
+.msg-time{font-size:9px;color:var(--tx3);padding:0 4px}
+.chat-concept{background:rgba(232,64,64,.05);border:1px solid rgba(232,64,64,.2);
+  border-radius:8px;padding:14px 18px;margin:12px 20px 16px;
+  font-size:12px;color:var(--tx2);line-height:1.6}
+.chat-concept strong{color:var(--sc);font-size:10px;letter-spacing:.15em;text-transform:uppercase}
+
+/* ── PUZZLE 4: EVIDENCE BOARD ── */
+.evidence-board{background:#1a1208;min-height:420px;position:relative;
+  padding:20px;overflow:hidden;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.45' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.06'/%3E%3C/svg%3E")}
+.ev-title{font-family:var(--sf);font-size:14px;letter-spacing:.06em;color:#c4a850;
+  border:2px solid #c4a850;padding:4px 12px;display:inline-block;margin-bottom:16px;
+  text-transform:uppercase}
+.ev-notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;margin-bottom:16px}
+.sticky{padding:14px 16px;font-family:var(--sf);font-size:12px;line-height:1.55;
+  position:relative;cursor:default;border-bottom:3px solid rgba(0,0,0,.15)}
+.sticky::after{content:'';position:absolute;top:0;right:0;width:0;height:0;
+  border-style:solid;border-width:0 22px 22px 0;border-color:transparent rgba(0,0,0,.12) transparent transparent}
+.sty-y{background:#f0de5a;color:#3a2c04}
+.sty-b{background:#b0d4f8;color:#0c2a4a}
+.sty-g{background:#b4e8b0;color:#0c3010}
+.sty-r{background:#f8b4b0;color:#4a0c0c}
+.pin{width:12px;height:12px;border-radius:50%;position:absolute;top:-6px;left:50%;
+  transform:translateX(-50%);z-index:2}
+.pin-r{background:#cc2020;box-shadow:0 0 6px rgba(204,32,32,.5)}
+.pin-g{background:#20cc50;box-shadow:0 0 6px rgba(32,204,80,.5)}
+.ev-clipping{background:var(--paper2);padding:16px;font-family:var(--sf);
+  font-size:11px;color:#2a2010;line-height:1.6;position:relative;border:1px solid var(--paper3)}
+.ev-clipping h4{font-family:var(--pf);font-size:14px;font-weight:700;margin-bottom:6px;color:#1a1208}
+.ev-clipping .source{font-size:9px;font-family:var(--mn);color:#6a5a38;margin-top:8px;letter-spacing:.05em}
+.ev-string{position:absolute;pointer-events:none}
+.ev-choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.ev-choice{padding:14px 16px;border-radius:8px;cursor:pointer;transition:.2s;
+  font-family:var(--mn);font-size:12px;line-height:1.55;border:2px solid transparent}
+.ev-choice:hover{transform:translateY(-2px)}
+.ev-choice.c-correct{background:rgba(34,201,122,.06);border-color:rgba(34,201,122,.25);color:var(--em)}
+.ev-choice.c-wrong{background:rgba(232,64,64,.06);border-color:rgba(232,64,64,.2);color:var(--sc)}
+.ev-choice h4{font-size:12px;margin-bottom:4px;font-weight:600}
+.ev-choice p{font-size:10px;opacity:.7}
+
+/* ── PUZZLE 5: BLACK IMAGE ── */
+.black-puzzle{background:#000;min-height:340px;position:relative;
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+.paheli-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;width:90%}
+.paheli-main{font-family:var(--sf);font-size:18px;line-height:1.7;
+  color:rgba(255,255,255,.06);user-select:text;cursor:text}
+.paheli-main:hover{color:rgba(255,255,255,.12);transition:.5s}
+.hidden-color{font-size:10px;font-family:var(--mn);letter-spacing:.15em;
+  position:absolute;bottom:16px;right:16px;opacity:.03;color:#ff0000;user-select:text}
+.hidden-dims{font-size:10px;font-family:var(--mn);
+  position:absolute;top:8px;left:8px;opacity:.02;color:#ffffff;user-select:text}
+.black-meta{position:absolute;bottom:0;left:0;right:0;height:1px;overflow:hidden}
+.canvas-tip{font-size:10px;font-family:var(--mn);color:rgba(255,255,255,.03);
+  position:absolute;bottom:5px;left:10px;letter-spacing:.05em;user-select:text}
+
+/* ── PUZZLE 6: INSTAGRAM ── */
+.ig-shell{background:linear-gradient(135deg,#0a0020 0%,#001030 50%,#000a18 100%);
+  padding:28px;border-radius:12px;text-align:center}
+.ig-riddle-box{background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.1);
+  border-radius:10px;padding:20px 24px;margin-bottom:20px;
+  font-family:var(--sf);font-size:14px;color:rgba(255,255,255,.65);line-height:1.85;
+  text-align:left}
+.ig-riddle-box .label{font-family:var(--mn);font-size:9px;letter-spacing:.2em;
+  color:rgba(201,168,76,.7);text-transform:uppercase;margin-bottom:10px;display:block}
+.ig-btn{display:inline-flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);
+  color:#fff;border:none;border-radius:10px;
+  padding:13px 26px;font-family:var(--hd);font-size:16px;letter-spacing:.1em;
+  cursor:pointer;text-decoration:none;transition:.2s;margin-bottom:16px}
+.ig-btn:hover{transform:scale(1.03);box-shadow:0 8px 28px rgba(253,29,29,.3)}
+.ig-instructions{font-size:12px;color:rgba(255,255,255,.35);line-height:1.7;margin-bottom:4px}
+
+/* MISDIRECT SCREEN */
+.mis-screen{text-align:center;padding:60px 28px}
+.mis-big{font-family:var(--hd);font-size:110px;color:var(--wire);line-height:1}
+.mis-sub{font-family:var(--hd);font-size:22px;color:var(--sc);margin:8px 0 10px}
+.mis-p{font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:20px}
+.mis-locker{background:var(--ink3);border:1px solid var(--wire2);border-radius:12px;
+  padding:24px;max-width:380px;margin:0 auto 24px}
+.mis-locker h3{font-family:var(--hd);font-size:18px;color:var(--sc);margin-bottom:12px;letter-spacing:.1em}
+.locker-row{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
+.locker-digit{width:44px;height:56px;background:var(--ink2);border:2px solid var(--wire2);
+  border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--hd);font-size:28px;color:var(--tx3)}
+.locker-hint{font-size:11px;color:var(--tx3);line-height:1.6}
+.locker-input{display:flex;gap:8px;margin-top:12px}
+.locker-input input{flex:1;background:var(--ink2);border:1px solid var(--wire2);
+  border-radius:6px;padding:10px 12px;color:var(--tx);font-family:var(--mn);
+  font-size:16px;letter-spacing:.3em;text-align:center;outline:none}
+.locker-input input:focus{border-color:var(--sc)}
+.ghost{background:transparent;border:1px solid var(--wire2);color:var(--au);
+  font-family:var(--hd);font-size:14px;letter-spacing:.08em;
+  border-radius:8px;padding:10px 22px;cursor:pointer;transition:.2s}
+.ghost:hover{border-color:var(--au)}
+
+/* WIN */
+.win-sc{text-align:center;padding:48px 24px}
+.win-sc h1{font-family:var(--hd);font-size:64px;color:var(--au);line-height:.92;margin:14px 0 8px}
+.win-score{font-family:var(--hd);font-size:74px;color:var(--cy);
+  text-shadow:0 0 30px rgba(24,212,192,.4)}
+.win-time{font-size:16px;color:var(--tx2);margin-bottom:4px}
+.stbl{width:100%;border-collapse:collapse;margin:22px 0;font-size:13px;text-align:left}
+.stbl th{color:var(--tx3);font-size:10px;letter-spacing:.15em;text-transform:uppercase;
+  padding:8px 12px;border-bottom:1px solid var(--wire)}
+.stbl td{padding:10px 12px;border-bottom:1px solid var(--wire);color:var(--tx2)}
+.stbl td.good{color:var(--em);text-align:right}
+
+/* FLASH */
+.flash{position:fixed;inset:0;background:rgba(34,201,122,.06);
+  pointer-events:none;z-index:997;animation:fl .65s ease both}
+@keyframes fl{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+.flash-red{position:fixed;inset:0;background:rgba(232,64,64,.06);
+  pointer-events:none;z-index:997;animation:fl .65s ease both}
+
+canvas.np-illus{width:100%;height:110px;display:block}
+</style>
+</head>
+<body>
+
+<div id="nav">
+  <div class="brand">⬡ CASE FILE: MARKET CIPHER</div>
+  <div id="step-dots">
+    <div class="sd act" id="sd0"></div>
+    <div class="sd" id="sd1"></div>
+    <div class="sd" id="sd2"></div>
+    <div class="sd" id="sd3"></div>
+    <div class="sd" id="sd4"></div>
+    <div class="sd" id="sd5"></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div id="team-pill"></div>
+    <div id="clock">00:00</div>
+  </div>
+</div>
+
+<div id="tkr">
+  <div class="tkline">
+    LEHMAN BROS <span class="dn">▼99.9%</span> · BEAR STEARNS <span class="dn">ACQUIRED</span> · CDS EXPOSURE $45T · SUBPRIME DEFAULTS <span class="dn">▲12.3%</span> · FED RATE CUT <span class="up">▲EMERGENCY</span> · S&P500 <span class="dn">▼38.5% YTD</span> · TARP $700B · MORAL HAZARD ALERT · SYSTEMIC RISK LEVEL: CRITICAL ·&nbsp;
+    LEHMAN BROS <span class="dn">▼99.9%</span> · BEAR STEARNS <span class="dn">ACQUIRED</span> · CDS EXPOSURE $45T · SUBPRIME DEFAULTS <span class="dn">▲12.3%</span> · FED RATE CUT <span class="up">▲EMERGENCY</span> · S&P500 <span class="dn">▼38.5% YTD</span> · TARP $700B · MORAL HAZARD ALERT · SYSTEMIC RISK LEVEL: CRITICAL
+  </div>
+</div>
+
+<div id="stage">
+
+<!-- ══ LANDING ══ -->
+<div class="screen on" id="s-land">
+  <div class="land">
+    <div class="land-banner">
+      <div class="land-grid"></div>
+      <div class="land-tag">REF: APR_2024_02 · ROUND 2</div>
+      <div class="land-title">CASE<br/>FILE<br/>CIPHER</div>
+    </div>
+    <div class="land-body">
+      <p>Six encrypted signals. Archives, crosswords, intercepted comms, evidence boards, black ops, and field intelligence. One word unlocks the next. A wrong turn triggers a lock puzzle. Timer starts on entry.</p>
+      <div class="code-wrap">
+        <label>Team Code</label>
+        <input id="team-input" maxlength="4" placeholder="NX01" onkeydown="if(event.key==='Enter')startGame()"/>
+        <span id="team-err">Format: 2 letters + 2 digits</span>
+      </div>
+      <button class="gobtn" onclick="startGame()">Open Case File →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PUZZLE 1: LEHMAN NEWS ARTICLE ══ -->
+<!-- Answer: contagion -->
+<div class="screen" id="s-p1">
+  <div class="ptag"><span class="pglob"></span>Puzzle 01 · Finance · Archived Signal</div>
+  <div class="pvis">
+    <div class="newspaper">
+      <div class="np-masthead">
+        <h1>THE FINANCIAL CHRONICLE</h1>
+      </div>
+      <div class="np-meta">
+        <span>MONDAY, SEPTEMBER 15, 2008 · VOL. XCII NO. 312</span>
+        <span>LATE CITY EDITION · ₹4.50</span>
+      </div>
+      <div class="np-headline">LEHMAN BROTHERS COLLAPSES:<br/>WALL STREET HOLDS ITS BREATH</div>
+      <div class="np-subhead">158-year-old investment bank files for Chapter 11; Merrill Lynch seized by BofA; AIG on the brink — world watches as dominoes fall</div>
+      <div class="np-cols">
+        <div>
+          <div class="np-body">
+            <p class="drop-cap">In an event that financial historians will mark as the single most consequential day of the 21st century, Lehman Brothers Holdings Inc. filed for Chapter 11 bankruptcy protection early Monday morning, becoming the largest corporate failure in American history with over $613 billion in outstanding debt.</p>
+            <p>The collapse, set in motion by catastrophic exposure to subprime mortgage-backed securities, sent shockwaves across global markets. The Sensex shed 1,020 points. London's FTSE fell 4%. Tokyo's Nikkei opened limit-down.</p>
+            <p>But economists warn: <em>the fall of one bank is not the story.</em> The story is what comes next — when one institution's failure forces margin calls at another, which triggers defaults at a third, which seizes credit at a fourth...</p>
+            <div class="np-riddle">
+              <strong>⬡ Embedded Cipher — Decode to Proceed</strong><br/><br/>
+              <em>I am not the fire — I am how it spreads.<br/>
+              I am not the default — I am how it cascades.<br/>
+              Lehman fell. But I carried the disease<br/>
+              from Wall Street to your street, across the seas.<br/>
+              In medicine they call me epidemic's cousin.<br/>
+              In finance I'm the reason one crack becomes a dozen.<br/>
+              What am I? (One word, the economic term)</em>
+            </div>
+          </div>
+        </div>
+        <div>
+          <canvas class="np-illus" id="cv-np"></canvas>
+          <div class="np-caption">Credit default swap exposure (2008) — interconnected risk web that amplified losses globally.</div>
+          <div class="np-body" style="margin-top:12px">
+            <p>The Federal Reserve and Treasury convened emergency sessions through the weekend. Treasury Secretary Hank Paulson was reported to have said: <span class="redacted">contagion risk is our primary concern</span>.</p>
+            <p>Unlike Bear Stearns — rescued six months prior — Lehman found no white knight. The question now: with $45 trillion in credit default swaps outstanding globally, what happens when counterparties cannot pay?</p>
+            <p>Analysts point to the <em>interconnectedness</em> of the system. "We built a financial system where everyone owed everyone else," said one economist. "The <span class="redacted">spread of losses</span> is now almost unstoppable."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="instr">
+    <strong>Read the archived article.</strong> A riddle is embedded inside the news report. The answer is a single economic term that captures how financial failures spread — like a disease jumping from host to host. Enter your answer as the URL path.
+  </div>
+  <div class="arow">
+    <div class="apre">casefile.io/</div>
+    <input id="a1" placeholder="economic term" autocomplete="off" onkeydown="if(event.key==='Enter')chk(1)"/>
+    <button class="gobtn" onclick="chk(1)">→</button>
+  </div>
+  <div class="fb" id="fb1"></div>
+  <div class="wct" id="wc1"></div>
+  <button class="hint-btn" onclick="th('h1')">Reveal a hint? (2 remaining)</button>
+  <div class="hbox" id="h1">Think about how diseases work — they spread from one person to the next, not all at once. Now apply that logic to banks. When one falls, it doesn't stay isolated. Economists borrowed this exact concept from medicine. What's the word doctors use when an illness jumps between people?</div>
+</div>
+
+<!-- ══ PUZZLE 2: ECONOMICS CROSSWORD ══ -->
+<!-- Answer: money -->
+<div class="screen" id="s-p2">
+  <div class="ptag"><span class="pglob"></span>Puzzle 02 · Economics · Grid Decode</div>
+  <div class="pvis">
+    <div class="xword-wrap">
+      <div class="xword-title">⬡ ECONOMICS CROSSWORD — EXTRACT THE SIGNAL</div>
+      <div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap">
+        <div>
+          <div class="xword-grid" id="xgrid"></div>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <div class="xword-clues">
+            <div class="clue-group">
+              <h3>ACROSS</h3>
+              <div class="clue-item"><span class="clue-n">1</span><span>Government's tool of tax and spending to steer the economy (6)</span></div>
+              <div class="clue-item"><span class="clue-n">3</span><span>Central banks set it; inflation and growth dance to its tune (8)</span></div>
+              <div class="clue-item"><span class="clue-n">5</span><span>Demand, supply, price — how sensitive is quantity to change? (9)</span></div>
+              <div class="clue-item"><span class="clue-n">7</span><span>Deficit spending in a downturn — the school of thought born from the Great Depression (10)</span></div>
+            </div>
+            <div class="clue-group">
+              <h3>DOWN</h3>
+              <div class="clue-item"><span class="clue-n">2</span><span>Where currencies meet: dollars, euros, yen traded here (5)</span></div>
+              <div class="clue-item"><span class="clue-n">6</span><span>The London rate banks charge each other — once a global benchmark, now reformed (5)</span></div>
+            </div>
+          </div>
+          <div class="xword-answer">
+            <p style="font-size:11px;color:var(--tx3)">★ cells are scattered through the grid — collect them in reading order (left→right, top→bottom) to form your answer.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="instr">
+    <strong>Solve the crossword.</strong> Fill in the grid using the across and down clues. The ★ cells, when read in order, spell out a word — that word is your URL path. The grid is arranged so each answer fits exactly according to its number and direction.
+  </div>
+  <div class="arow">
+    <div class="apre">casefile.io/</div>
+    <input id="a2" placeholder="extracted word" autocomplete="off" onkeydown="if(event.key==='Enter')chk(2)"/>
+    <button class="gobtn" onclick="chk(2)">→</button>
+  </div>
+  <div class="fb" id="fb2"></div>
+  <div class="wct" id="wc2"></div>
+  <button class="hint-btn" onclick="th('h2')">Reveal a hint? (2 remaining)</button>
+  <div class="hbox" id="h2">The ★ cells glow in teal/cyan — read those letters only, top-to-bottom then left-to-right within each row. The hidden word is something every economist, banker, and student studies from day one — it flows through the entire global financial system and is the subject of central bank policy.</div>
+</div>
+
+<!-- ══ PUZZLE 3: CEO CHAT ══ -->
+<!-- Answer: liquidity -->
+<div class="screen" id="s-p3">
+  <div class="ptag"><span class="pglob"></span>Puzzle 03 · Business · Intercepted Transmission</div>
+  <div class="pvis">
+    <div class="chat-shell">
+      <div class="chat-header">
+        <div class="chat-avatars">
+          <div class="avatar" style="background:rgba(201,168,76,.15);color:var(--au)">RK</div>
+          <div class="avatar" style="background:rgba(24,212,192,.12);color:var(--cy)">MS</div>
+        </div>
+        <div class="chat-header-text">
+          <h3>Rahul Khanna (Paytm) ↔ Manish Sabharwal (TeamLease)</h3>
+          <p>Encrypted · March 2023 · RE: Shared crisis response</p>
+        </div>
+        <span class="chat-secure">🔒 SECURED</span>
+      </div>
+      <div class="chat-body">
+        <div class="msg left">
+          <div class="msg-sender">Rahul K.</div>
+          <div class="msg-bubble">Manish bhai, tumne suna? RBI ne naya directive diya hai — payment aggregators ko additional capital reserve maintain karni padegi. Hamare operations pe direct impact hai.</div>
+          <div class="msg-time">9:14 AM</div>
+        </div>
+        <div class="msg right">
+          <div class="msg-sender">Manish S.</div>
+          <div class="msg-bubble">Haan, mujhe bhi pata chala. Aur upar se March-end hai — salary disbursements ka peak time. Mera staffing business bhi 3-4 days ka float maintain karta hai. Abhi suddenly rules change ho gaye toh short-term cash flow mein problem hogi.</div>
+          <div class="msg-time">9:17 AM</div>
+        </div>
+        <div class="msg left">
+          <div class="msg-sender">Rahul K.</div>
+          <div class="msg-bubble">Exactly. The core problem isn't solvency — both our companies are profitable. The issue is timing. Inflows aur outflows match nahi kar rahe short term mein. Like... paani toh hai, lekin pipe mein pressure kam hai.</div>
+          <div class="msg-time">9:21 AM</div>
+        </div>
+        <div class="msg right">
+          <div class="msg-sender">Manish S.</div>
+          <div class="msg-bubble">Bahut accha analogy! Aur agar ek time pe sab companies isko ek sath feel karein — toh systemic risk ban jaata hai. 2008 mein yahi hua tha na? Lehman down hua kyunki _____ crisis aayi — assets the, but couldn't convert to cash fast enough.</div>
+          <div class="msg-time">9:24 AM</div>
+        </div>
+        <div class="msg left">
+          <div class="msg-sender">Rahul K.</div>
+          <div class="msg-bubble">Bilkul. That one word. That's the concept regulators are trying to prevent. The ability — or inability — to meet short-term obligations. It's not about net worth, it's about flow. What do economists call this property of a market or firm?</div>
+          <div class="msg-time">9:27 AM</div>
+        </div>
+        <div class="msg right">
+          <div class="msg-sender">Manish S.</div>
+          <div class="msg-bubble">The word is right there in Rahul's analogy. "Paani toh hai, lekin..." — water exists, but it can't flow when needed. Central banks monitor this as their #1 systemic risk metric. The Fed, RBI, ECB — all maintain this ratio for banks. One word. Enter it.</div>
+          <div class="msg-time">9:29 AM</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="instr">
+    <strong>Decode the conversation.</strong> Two CEOs are discussing a financial crisis affecting both their companies. Listen carefully to what they describe — what they can't do despite having assets and revenue. One economic concept runs through their entire exchange. That single word is your URL path.
+  </div>
+  <div class="arow">
+    <div class="apre">casefile.io/</div>
+    <input id="a3" placeholder="the economic concept" autocomplete="off" onkeydown="if(event.key==='Enter')chk(3)"/>
+    <button class="gobtn" onclick="chk(3)">→</button>
+  </div>
+  <div class="fb" id="fb3"></div>
+  <div class="wct" id="wc3"></div>
+  <button class="hint-btn" onclick="th('h3')">Reveal a hint? (2 remaining)</button>
+  <div class="hbox" id="h3">Rahul uses a water analogy — "paani toh hai, lekin pressure kam hai." Focus on what the water represents and why its absence causes crises. RBI, the Fed, and ECB all publish a specific ratio that measures this property in banks. Look at what the "L" stands for in LCR — three letters, one word.</div>
+</div>
+
+<!-- ══ PUZZLE 4: EVIDENCE BOARD ══ -->
+<!-- Correct: scalping  |  Wrong/trap: arbitrage (leads to locker screen) -->
+<div class="screen" id="s-p4">
+  <div class="ptag"><span class="pglob"></span>Puzzle 04 · Trading · Evidence Board</div>
+  <div class="pvis">
+    <div class="evidence-board">
+      <div class="ev-title">CASE FILE: TRADING DESK INTEL · REF: MAY_2026_04</div>
+      <div class="ev-notes">
+        <div class="sticky sty-y" style="transform:rotate(-2deg)">
+          <div class="pin pin-r"></div>
+          Trader holds Nifty futures for just 47 seconds. In. Profit. Out. Repeat 200 times a day.
+        </div>
+        <div class="sticky sty-b" style="transform:rotate(1.5deg)">
+          <div class="pin pin-g"></div>
+          "We don't care about direction — we just clip tiny margins off the bid-ask spread, hundreds of times per session."
+        </div>
+        <div class="sticky sty-g" style="transform:rotate(-1deg)">
+          <div class="pin pin-r"></div>
+          Requires lightning-fast execution, tight spreads, and extreme discipline. One bad trade can wipe 10 wins.
+        </div>
+        <div class="sticky sty-r" style="transform:rotate(2.5deg)">
+          <div class="pin pin-r"></div>
+          DISTRACTION: This is NOT buying on one exchange and selling on another. That's a different strategy entirely — same asset, two markets.
+        </div>
+        <div class="sticky sty-y" style="transform:rotate(-1.5deg)">
+          <div class="pin pin-g"></div>
+          The strategy: extract small profits from tiny price movements. Volume is your edge. Hold time: seconds.
+        </div>
+        <div class="sticky sty-b" style="transform:rotate(1deg)">
+          <div class="pin pin-r"></div>
+          Used by HFT desks globally. SEBI tracks it. Named after the idea of removing thin layers — like peeling a skin.
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="ev-clipping">
+          <h4>HFT Desk Log — March 2026</h4>
+          Session report shows 218 completed trades, avg hold time 34 seconds. Each trade targeted ₹0.15–₹0.40 profit per unit on Nifty50 futures. Total session P&L: ₹2,14,000. Strategy operates on volume and speed — not on predicting market direction or cross-market price gaps.
+          <div class="source">SOURCE: PROP TRADING DESK INTERNAL REPORT · Q1 2026</div>
+        </div>
+        <div class="ev-clipping">
+          <h4>Cross-Market Price Gap Spotted</h4>
+          Infosys spotted at ₹142 on NSE and ₹145 on BSE simultaneously. High-frequency traders buy cheap, sell expensive — same asset, two exchanges, guaranteed spread. This is a well-known market-neutral strategy, but it is NOT what the trading desk above is doing.
+          <div class="source">SOURCE: SEBI MARKET SURVEILLANCE · Q1 2024</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="instr">
+    <strong>Study the evidence board.</strong> The desk log describes a very specific short-term trading strategy — rapid, high-frequency, tiny margins, seconds-long holds. The red sticky warns you away from a common wrong answer. Name the exact strategy. One word.
+  </div>
+  <div class="arow">
+    <div class="apre">casefile.io/</div>
+    <input id="a4" placeholder="trading strategy" autocomplete="off" onkeydown="if(event.key==='Enter')chk(4)"/>
+    <button class="gobtn" onclick="chk(4)">→</button>
+  </div>
+  <div class="fb" id="fb4"></div>
+  <div class="wct" id="wc4"></div>
+  <button class="hint-btn" onclick="th('h4')">Reveal a hint? (2 remaining)</button>
+  <div class="hbox" id="h4">Think about the name of a strategy where a trader makes dozens or hundreds of trades per day, each targeting tiny price movements — just a few paise per unit. They "peel" small profits repeatedly. The red sticky tells you it's NOT arbitrage (cross-market). Hold time is seconds. Volume is everything. The word comes from removing thin layers, like a scalp.</div>
+</div>
+
+<!-- ══ MISDIRECT / LOCKER SCREEN ══ -->
+<div class="screen" id="s-lock">
+  <div class="mis-screen">
+    <div class="mis-big">LOCK</div>
+    <div class="mis-sub">Access Restricted.</div>
+    <div class="mis-p">A security lock has been triggered. Solve the bonus puzzle below to unlock and continue.</div>
+    <div class="mis-locker">
+      <h3>⬡ LOCKER PUZZLE</h3>
+      <div class="locker-row">
+        <div class="locker-digit">_</div>
+        <div class="locker-digit">_</div>
+        <div class="locker-digit">_</div>
+        <div class="locker-digit">_</div>
+      </div>
+      <div class="locker-hint">
+        A 4-digit code is required.<br/>
+        <em>SEBI was established in the same year India liberalised its economy — the year that opened India's markets to the world. What year was that?</em>
+      </div>
+      <div class="locker-input">
+        <input id="locker-in" maxlength="4" placeholder="YEAR" autocomplete="off" onkeydown="if(event.key==='Enter')chkLocker()"/>
+        <button class="gobtn" style="background:var(--sc)" onclick="chkLocker()">UNLOCK</button>
+      </div>
+      <div class="fb" id="fb-lock" style="margin-top:8px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PUZZLE 5: BLACK IMAGE / PAHELI ══ -->
+<!-- Answer: merger -->
+<div class="screen" id="s-p5">
+  <div class="ptag"><span class="pglob"></span>Puzzle 05 · Cryptic · Black Ops Signal</div>
+  <div class="pvis">
+    <div class="black-puzzle" id="black-div">
+      <div class="paheli-text">
+        <div class="paheli-main" id="paheli">
+          मैं वह घटना हूँ जो दो कंपनियों को एक बनाती है,<br/>
+          बड़ी मछली छोटी को निगल जाती है।<br/>
+          Wall Street पर मेरे announcement से<br/>
+          शेयर बाज़ार में हलचल मच जाती है।<br/><br/>
+          I am the deal that makes two companies one,<br/>
+          When boards agree and negotiations are done.<br/>
+          Investment banks earn fees when I occur,<br/>
+          Shareholders vote, regulators concur.<br/>
+          What is this corporate event called?<br/>
+          One word. Six letters. Commonly heard.
+        </div>
+      </div>
+      <div class="hidden-dims" id="dims-hint">casefile_signal: corporate_event=merger, type=MA</div>
+      <div class="canvas-tip" id="canvas-tip">/* signal_metadata: event_type=merger, sector=investment_banking */</div>
+    </div>
+  </div>
+  <div class="instr">
+    <strong>The image appears black.</strong> A business riddle is embedded in the darkness — read it carefully. It describes a major corporate finance event where two companies become one. Enter the single word.
+  </div>
+  <div class="arow">
+    <div class="apre">casefile.io/</div>
+    <input id="a5" placeholder="corporate event" autocomplete="off" onkeydown="if(event.key==='Enter')chk(5)"/>
+    <button class="gobtn" onclick="chk(5)">→</button>
+  </div>
+  <div class="fb" id="fb5"></div>
+  <div class="wct" id="wc5"></div>
+  <button class="hint-btn" onclick="th('h5')">Reveal a hint? (2 remaining)</button>
+  <div class="hbox" id="h5">The riddle describes a corporate deal — two companies combining into one entity. Think about what lawyers, bankers and newspapers call it when Company A and Company B officially become one combined company by mutual board agreement. Six letters. It's the first word in a very common two-word phrase used in corporate finance.</div>
+</div>
+
+<!-- ══ PUZZLE 6: INSTAGRAM — ALWAYS LAST ══ -->
+<!-- Answer: ecosystem -->
+<div class="screen" id="s-p6">
+  <div class="ptag"><span class="pglob"></span>Puzzle 06 · Field Intel · Final Signal — TIMER ENDS ON SUBMIT</div>
+  <div class="pvis">
+    <div class="ig-shell">
+      <div class="ig-riddle-box">
+        <span class="label">⬡ Encoded Transmission — Final Field Assignment</span>
+
+        I am not a forest, not an ocean, not a field —<br/>
+        yet without me, no startup can survive or be healed.<br/>
+        Borrowed from biology, now worn by business with pride,<br/>
+        I am the whole world a new venture needs inside.<br/><br/>
+
+        I am not a person. I am not a place.<br/>
+        I am the network, the support, the breathing space.<br/>
+        Mentors, money, policy, and more —<br/>
+        I am what surrounds what walks through the startup door.<br/><br/>
+
+        <span style="color:rgba(255,200,100,.75);font-size:12px;line-height:1.8">
+        → Head to Instagram → <strong style="color:rgba(255,200,100,.95)">@ryn.india</strong><br/>
+        → Scroll through their <strong style="color:rgba(255,200,100,.85)">NEXUS 2026</strong> posts.<br/>
+        → One post holds the word this riddle is describing.<br/>
+        → That word is your final signal.
+        </span>
+      </div>
+      <a class="ig-btn" href="https://www.instagram.com/ryn.india/" target="_blank" onclick="_igWindowOpen=true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        Open @ryn.india →
+      </a>
+      <div class="ig-instructions">
+        The riddle describes a single concept word.<br/>
+        Find it somewhere in the <strong style="color:rgba(255,200,100,.7)">NEXUS 2026</strong> posts on @ryn.india.<br/>
+        Enter that word below — it closes the case and stops your timer.
+      </div>
+    </div>
+  </div>
+  <div class="instr">
+    <strong>Final field assignment.</strong> The riddle points to a word — one borrowed from biology, now central to the startup world. Scroll through @ryn.india's NEXUS 2026 feed on Instagram. The word will appear. One word. Submitting it closes the case.
+    <br/><br/>Decoys: &nbsp;<code style="color:var(--wire2)">/nexus</code> &nbsp;<code style="color:var(--wire2)">/hub</code> &nbsp;<code style="color:var(--wire2)">/network</code>
+  </div>
+  <div class="arow">
+    <div class="apre">casefile.io/</div>
+    <input id="a6" placeholder="the concept word" autocomplete="off" onkeydown="if(event.key==='Enter')chk(6)"/>
+    <button class="gobtn" onclick="chk(6)">→</button>
+  </div>
+  <div class="fb" id="fb6"></div>
+  <div class="wct" id="wc6"></div>
+  <button class="hint-btn" onclick="th('h6')">Reveal a hint? (2 remaining)</button>
+  <div class="hbox" id="h6">In biology, it means a community of living things interacting with each other and their environment. In the startup world, it means the full web of investors, mentors, government, and institutions that support new ventures. Nine letters. Look for it in the NEXUS 2026 posts on @ryn.india — it will be right there in front of you.</div>
+</div>
+
+<!-- WIN -->
+<div class="screen" id="s-win">
+  <div class="win-sc">
+    <div style="font-size:48px;margin-bottom:6px">🏆</div>
+    <div style="font-family:var(--hd);font-size:12px;letter-spacing:.2em;color:var(--au)">CASE FILE: MARKET CIPHER — COMPLETE</div>
+    <h1>ALL<br/>SIGNALS<br/>DECODED</h1>
+    <div class="win-time" id="win-time">Total time: —</div>
+    <div class="win-score" id="win-score">—</div>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:4px">points</div>
+    <table class="stbl">
+      <thead><tr><th>Puzzle</th><th>Domain</th><th>Misses</th><th>Time</th><th>Score</th></tr></thead>
+      <tbody id="stbl-body"></tbody>
+    </table>
+    <div style="margin-top:20px">
+      <button class="ghost" onclick="resetGame()">Play Again</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div id="urlbar"><span id="urltext">casefile.io/start</span></div>
+
+<!-- TAB-SWITCH BLOCKER OVERLAY -->
+<div id="tab-block" style="
+  display:none;position:fixed;inset:0;z-index:99999;
+  background:rgba(6,8,12,.97);backdrop-filter:blur(12px);
+  flex-direction:column;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;text-align:center;gap:20px">
+  <div style="font-size:56px">🔒</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:.2em;color:#e84040">
+    SESSION LOCKED
+  </div>
+  <div style="font-size:13px;color:#7880a0;max-width:380px;line-height:1.8">
+    Tab switch detected. Your session is locked.<br/>
+    Contact the organiser to unlock.
+  </div>
+  <div id="tab-block-sub" style="font-size:11px;color:#2a3050;margin-top:4px"></div>
+  <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+    <input id="unlock-code" maxlength="4" placeholder="_ _ _ _"
+      autocomplete="off" onkeydown="if(event.key==='Enter')dismissTabBlock()"
+      style="width:90px;padding:10px;text-align:center;letter-spacing:.3em;font-size:18px;
+        background:rgba(255,255,255,.04);border:1px solid #2a3050;color:#c9a84c;
+        font-family:'IBM Plex Mono',monospace;border-radius:4px;outline:none"/>
+    <button onclick="dismissTabBlock()" style="
+      padding:10px 20px;background:transparent;border:1px solid #2a3050;
+      color:#4a5270;font-family:'IBM Plex Mono',monospace;
+      font-size:12px;cursor:pointer;border-radius:4px">
+      UNLOCK
+    </button>
+  </div>
+  <div id="unlock-err" style="font-size:11px;color:#e84040;min-height:16px"></div>
+</div>
+
+<script>
+const ANSWERS={1:['contagion'],2:['money'],3:['liquidity'],4:['scalping'],5:['merger'],6:['ecosystem']};
+
+// ── TAB-SWITCH BLOCKER ──
+let _tabPauseStart = 0;
+let _tabPausedMs = 0;
+let _igWindowOpen = false;   // true only when we opened instagram from p6
+
+function isGameActive(){
+  // Block is active only while a puzzle is in progress (not on land, win, or lock screen)
+  return G.start > 0 && !['land','win','lock'].includes(G.cur);
+}
+
+function showTabBlock(){
+  if(!isGameActive()) return;
+  // If we're on p6 and the instagram window was just opened — allow it
+  if(_igWindowOpen){ _igWindowOpen=false; return; }
+  // Pause timer
+  _tabPauseStart = Date.now();
+  clearInterval(G.interval);
+  const el = document.getElementById('tab-block');
+  const sub = document.getElementById('tab-block-sub');
+  if(el){
+    el.style.display='flex';
+    if(sub) sub.textContent = `Tab switch detected at puzzle ${G.cur.replace('p','')} — ${new Date().toLocaleTimeString()}`;
+  }
+}
+
+const UNLOCK_CODE = '2105';
+
+function dismissTabBlock(){
+  const inp = document.getElementById('unlock-code');
+  const err = document.getElementById('unlock-err');
+  if(!inp) return;
+  if(inp.value.trim() !== UNLOCK_CODE){
+    if(err) err.textContent = 'Wrong code.';
+    inp.value='';inp.focus();
+    return;
+  }
+  if(err) err.textContent='';
+  inp.value='';
+  const el = document.getElementById('tab-block');
+  if(el) el.style.display='none';
+  if(!isGameActive()) return;
+  // Resume timer — compensate for paused time
+  if(_tabPauseStart){
+    const pausedFor = Date.now() - _tabPauseStart;
+    G.start += pausedFor;
+    _tabPauseStart = 0;
+  }
+  G.interval = setInterval(()=>{
+    const e = Date.now()-G.start;
+    const m=Math.floor(e/60000), s=Math.floor((e%60000)/1000);
+    document.getElementById('clock').textContent=
+      String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  },500);
+}
+
+// Intercept the Instagram link click on p6 — mark as allowed
+document.addEventListener('click', e=>{
+  const link = e.target.closest('a[href*="instagram.com"]');
+  if(link){ _igWindowOpen = true; }
+}, true);
+
+// Listen for visibility change (tab switch / window minimize)
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden) showTabBlock();
+});
+
+// Also catch window blur (switch to different app/window)
+window.addEventListener('blur', ()=>{
+  if(!document.hidden) showTabBlock();  // catches alt-tab to another app
+});
+const LOCKER_CODE='1992';
+const URLS={land:'casefile.io/start',p1:'casefile.io/start',p2:'casefile.io/contagion',p3:'casefile.io/money',p4:'casefile.io/liquidity',p5:'casefile.io/scalping',p6:'casefile.io/merger',win:'casefile.io/ecosystem',lock:'casefile.io/[LOCKED]'};
+const META=[
+  {l:'Lehman Cipher',d:'Finance'},
+  {l:'Economics Crossword',d:'Economics'},
+  {l:'CEO Chat Decode',d:'Business'},
+  {l:'Evidence Board',d:'Economics'},
+  {l:'Black Ops Signal',d:'Cryptic'},
+  {l:'Field Intelligence',d:'Business'},
+];
+const OK=[
+  'Signal confirmed. Contagion identified.',
+  'Grid decoded. Money signal extracted.',
+  'Concept cracked. Liquidity path unlocked.',
+  'Trading strategy decoded. Scalping confirmed.',
+  'Corporate event decoded. Merger confirmed.',
+  'Final keyword received. Ecosystem decoded. Case closed.',
+];
+
+
+// Global hint counter: max 2 hints across all puzzles
+let G_hints=0;
+const MAX_HINTS=2;
+
+// ── SHUFFLE ENGINE ──
+// PUZZLE_ORDER: array of 6 puzzle IDs in the order they'll be played.
+// Rules:
+//   • p6 (Instagram) is ALWAYS last (slot 6).
+//   • p4 (Evidence Board) can be in any of slots 1-5; the locker always returns to it.
+//   • Remaining puzzles (p1,p2,p3,p5) fill the remaining slots randomly.
+let PUZZLE_ORDER = ['p1','p2','p3','p4','p5','p6']; // default, overwritten on startGame
+
+function buildOrder(){
+  // Shuffle p1,p2,p3,p4,p5 — p6 locked to end
+  const pool = ['p1','p2','p3','p4','p5'];
+  for(let i=pool.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [pool[i],pool[j]]=[pool[j],pool[i]];
+  }
+  PUZZLE_ORDER = [...pool, 'p6'];
+}
+
+// Given a slot index 0-5, return the puzzle ID
+function slotToPid(slot){ return PUZZLE_ORDER[slot]; }
+// Given a puzzle ID, return its slot index
+function pidToSlot(pid){ return PUZZLE_ORDER.indexOf(pid); }
+// Get the "static" puzzle number (1-6) from a puzzle ID — used for ANSWERS/OK lookup
+function pidToNum(pid){ return parseInt(pid.replace('p','')); }
+// Return the p4 slot index (evidence board — the one that triggers the locker)
+function evidenceSlot(){ return PUZZLE_ORDER.indexOf('p4'); }
+
+let G={team:'',cur:'land',prev:'land',start:0,interval:null,elapsed:0,
+  wrong:[0,0,0,0,0,0],pStart:[0,0,0,0,0,0],pTime:[0,0,0,0,0,0]};
+
+function startGame(){
+  const inp=document.getElementById('team-input');
+  const val=inp.value.trim().toUpperCase();
+  const err=document.getElementById('team-err');
+  if(!/^[A-Z]{2}[0-9]{2}$/.test(val)){
+    err.style.display='block';
+    inp.style.borderColor='var(--sc)';
+    setTimeout(()=>{inp.style.borderColor='';err.style.display='none';},1500);
+    return;
+  }
+  buildOrder(); // new shuffle each run
+  G.team=val;
+  document.getElementById('team-pill').textContent=val;
+  document.getElementById('team-pill').style.display='block';
+  startTimer();
+  goSlot(0); // start at slot 0
+}
+
+function startTimer(){
+  G.start=Date.now();
+  document.getElementById('clock').style.display='block';
+  G.interval=setInterval(()=>{
+    const ms=Date.now()-G.start;
+    const m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000);
+    document.getElementById('clock').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  },1000);
+}
+
+function stopTimer(){clearInterval(G.interval);G.elapsed=Date.now()-G.start;}
+
+// Navigate to a slot (0-based index into PUZZLE_ORDER)
+function goSlot(slot){
+  const pid = PUZZLE_ORDER[slot];
+  go(pid, slot);
+}
+
+function go(id, slotOverride){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  const el=document.getElementById('s-'+id);
+  if(el){el.classList.add('on');window.scrollTo({top:0,behavior:'smooth'});}
+  G.prev=G.cur; G.cur=id;
+
+  const bar=document.getElementById('urlbar');
+  const ut=document.getElementById('urltext');
+  ut.textContent=URLS[id]||'casefile.io/'+id;
+  bar.className='';
+  if(id==='lock') bar.classList.add('bad');
+  else if(id!=='land') bar.classList.add('ok');
+
+  // Progress dots — based on slot position
+  const slot = (slotOverride !== undefined) ? slotOverride : pidToSlot(id);
+  for(let i=0;i<6;i++){
+    const d=document.getElementById('sd'+i);
+    if(i<slot) d.className='sd dn';
+    else if(i===slot) d.className='sd act';
+    else d.className='sd';
+  }
+  if(id==='win'||id==='lock'){
+    // lock: keep current dots; win: all done
+    if(id==='win') for(let i=0;i<6;i++) document.getElementById('sd'+i).className='sd dn';
+  }
+
+  // Track puzzle start time using the puzzle's static num (1-6) as index
+  if(id.startsWith('p')){
+    const n=pidToNum(id)-1;
+    if(!G.pStart[n]) G.pStart[n]=Date.now();
+  }
+  if(id==='p1') drawNewspaper();
+  if(id==='p2') drawXword();
+  if(id==='win') showWin();
+}
+
+function chk(n){
+  // n = static puzzle number (1-6), matching the input id a1..a6
+  const inp=document.getElementById('a'+n);
+  const val=inp.value.trim().toLowerCase();
+  const fb=document.getElementById('fb'+n);
+  if(!val){fb.textContent='↳ Enter something first.';fb.className='fb er';return;}
+
+  if(ANSWERS[n].includes(val)){
+    const i=n-1; G.pTime[i]=Date.now()-(G.pStart[i]||G.start);
+    fb.textContent='✓  '+OK[n-1]; fb.className='fb ok';
+    flash(); inp.disabled=true;
+
+    if(n===6){
+      stopTimer();
+      // Save score to localStorage (no file saving)
+      try{
+        const ms=G.elapsed||(Date.now()-G.start);
+        const m2=Math.floor(ms/60000),s2=Math.floor((ms%60000)/1000);
+        const totalW=G.wrong.reduce((a,b)=>a+b,0);
+        const score=Math.max(0,2400-Math.floor(ms/1000)-totalW*20);
+        const ts=new Date().toISOString().replace('T',' ').slice(0,19);
+        const record={team:G.team,completedAt:ts,totalTime:`${m2}m ${s2}s`,score,wrongAttempts:totalW};
+        localStorage.setItem('finquest_last',JSON.stringify(record));
+        const lb=JSON.parse(localStorage.getItem('finquest_lb')||'[]');
+        lb.push(record); lb.sort((a,b)=>b.score-a.score);
+        localStorage.setItem('finquest_lb',JSON.stringify(lb.slice(0,50)));
+      }catch(e){}
+    }
+
+    setTimeout(()=>{
+      inp.disabled=false; inp.value=''; fb.textContent=''; fb.className='fb';
+      // Find current slot for this puzzle, advance to next
+      const pid='p'+n;
+      const curSlot=pidToSlot(pid);
+      if(curSlot < 5) goSlot(curSlot+1);
+      else go('win');
+    },1500);
+
+  } else {
+    G.wrong[n-1]++;
+    inp.classList.add('shk'); setTimeout(()=>inp.classList.remove('shk'),400);
+
+    // Evidence board (p4) trap: arbitrage triggers the locker silently
+    if(n===4 && val==='arbitrage'){
+      setTimeout(()=>{fb.textContent='';fb.className='fb';inp.value='';go('lock');},600);
+    } else {
+      fb.textContent='✗  Wrong. Check your reasoning.';fb.className='fb er';
+      const wc=document.getElementById('wc'+n);
+      if(G.wrong[n-1]>=2) wc.textContent='⚠  '+G.wrong[n-1]+' wrong attempts — each costs 20 pts.';
+    }
+  }
+}
+
+function chkLocker(){
+  const inp=document.getElementById('locker-in');
+  const fb=document.getElementById('fb-lock');
+  if(inp.value.trim()===LOCKER_CODE){
+    fb.textContent='✓ Code accepted. Lock released.';fb.className='fb ok';
+    flash();
+    // Return to evidence board (p4) — find its current slot
+    setTimeout(()=>{inp.value='';fb.textContent='';fb.className='fb';go('p4');},1600);
+  } else {
+    inp.classList.add('shk');setTimeout(()=>inp.classList.remove('shk'),400);
+    fb.textContent='✗ Wrong code.';fb.className='fb er';
+  }
+}
+
+function th(id){
+  const b=document.getElementById(id);
+  const btn=b.previousElementSibling;
+  if(b.classList.contains('open')){
+    b.classList.remove('open');
+    btn.textContent='Reveal a hint? ('+Math.max(0,MAX_HINTS-G_hints)+' remaining)';
+    return;
+  }
+  if(G_hints>=MAX_HINTS){
+    btn.textContent='No hints left — figure it out!';
+    btn.style.color='var(--sc)';
+    return;
+  }
+  G_hints++;
+  b.classList.add('open');
+  btn.textContent='Hide hint ('+(MAX_HINTS-G_hints)+' hints remaining)';
+  document.querySelectorAll('.hint-btn').forEach(hb=>{
+    if(hb!==btn&&!hb.nextElementSibling?.classList.contains('open')){
+      if(G_hints>=MAX_HINTS){
+        hb.textContent='No hints left.';
+        hb.style.color='var(--sc)';
+      } else {
+        hb.textContent='Reveal a hint? ('+(MAX_HINTS-G_hints)+' remaining)';
+      }
+    }
+  });
+}
+
+function showWin(){
+  const ms=G.elapsed||(Date.now()-G.start);
+  const m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000);
+  document.getElementById('win-time').textContent=`Total time: ${m}m ${s}s`;
+  const totalW=G.wrong.reduce((a,b)=>a+b,0);
+  const score=Math.max(0,2400-Math.floor(ms/1000)-totalW*20);
+  document.getElementById('win-score').textContent=score;
+  // Show puzzles in the ORDER they were played
+  let tb='';
+  PUZZLE_ORDER.forEach((pid,slot)=>{
+    const n=pidToNum(pid)-1;
+    const m2=META[n];
+    const ts=G.pTime[n]?(G.pTime[n]/1000).toFixed(1)+'s':'—';
+    const pts=Math.max(0,400-Math.floor((G.pTime[n]||0)/1000)-G.wrong[n]*20);
+    tb+=`<tr><td>Slot ${slot+1} · ${m2.l}</td><td>${m2.d}</td><td>${G.wrong[n]}</td><td>${ts}</td><td class="good">${pts}</td></tr>`;
+  });
+  document.getElementById('stbl-body').innerHTML=tb;
+}
+
+function resetGame(){
+  clearInterval(G.interval);
+  G={team:'',cur:'land',prev:'land',start:0,interval:null,elapsed:0,
+    wrong:[0,0,0,0,0,0],pStart:[0,0,0,0,0,0],pTime:[0,0,0,0,0,0]};
+  G_hints=0;
+  document.getElementById('clock').style.display='none';
+  document.getElementById('clock').textContent='00:00';
+  document.getElementById('team-pill').style.display='none';
+  document.getElementById('team-input').value='';
+  for(let i=1;i<=6;i++){
+    const inp=document.getElementById('a'+i);
+    if(inp){inp.value='';inp.disabled=false;}
+    const fb=document.getElementById('fb'+i);if(fb){fb.textContent='';fb.className='fb';}
+    const wc=document.getElementById('wc'+i);if(wc)wc.textContent='';
+    const h=document.getElementById('h'+i);if(h)h.classList.remove('open');
+  }
+  document.querySelectorAll('.hint-btn').forEach(hb=>{
+    hb.textContent='Reveal a hint? (2 remaining)';
+    hb.style.color='';
+  });
+  go('land');
+}
+
+function flash(){
+  const el=document.createElement('div');el.className='flash';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),700);
+}
+function flashRed(){
+  const el=document.createElement('div');el.className='flash-red';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),700);
+}
+
+// ── NEWSPAPER CANVAS ──
+function drawNewspaper(){
+  const cv=document.getElementById('cv-np');
+  if(!cv)return;
+  const W=cv.offsetWidth||380,H=110;
+  const r=window.devicePixelRatio||1;
+  cv.width=W*r;cv.height=H*r;
+  const c=cv.getContext('2d');c.scale(r,r);
+  c.fillStyle='#d4c99a';c.fillRect(0,0,W,H);
+  // network graph of interconnected banks
+  const nodes=[
+    {x:.1,y:.5,l:'LEH',dead:true},{x:.3,y:.2,l:'GS'},{x:.3,y:.8,l:'JPM'},
+    {x:.5,y:.5,l:'AIG',dead:true},{x:.7,y:.2,l:'ML',dead:true},{x:.7,y:.7,l:'C'},
+    {x:.9,y:.5,l:'BAC'}
+  ];
+  const edges=[[0,2],[0,3],[1,3],[1,4],[2,3],[3,4],[3,5],[4,6],[5,6],[0,1],[2,5]];
+  edges.forEach(([a,b])=>{
+    const na=nodes[a],nb=nodes[b];
+    c.strokeStyle=na.dead||nb.dead?'rgba(180,50,30,.35)':'rgba(90,74,40,.2)';
+    c.lineWidth=na.dead||nb.dead?1.5:1;
+    c.setLineDash(na.dead||nb.dead?[3,3]:[]);
+    c.beginPath();c.moveTo(na.x*W,na.y*H);c.lineTo(nb.x*W,nb.y*H);c.stroke();
+    c.setLineDash([]);
+  });
+  nodes.forEach(n=>{
+    c.fillStyle=n.dead?'#8a2020':'#5a4a28';
+    c.beginPath();c.arc(n.x*W,n.y*H,n.dead?7:5,0,Math.PI*2);c.fill();
+    c.fillStyle=n.dead?'#ffcccc':'#f5eedc';
+    c.font=`bold ${n.dead?10:9}px IBM Plex Mono,monospace`;c.textAlign='center';
+    c.fillText(n.l,n.x*W,n.y*H+3.5);
+  });
+  c.fillStyle='rgba(90,60,20,.5)';c.font='9px IBM Plex Mono,monospace';c.textAlign='left';
+  c.fillText('CONTAGION NETWORK · 2008',6,H-5);
+}
+
+// ── CROSSWORD ──
+// VERIFIED GRID (10 cols × 10 rows):
+// Words:
+//   ACROSS: 1=FISCAL(r0,c0-5), 3=MONETARY(r2,c0-7), 5=KEYNESIAN(r4,c0-8), 7=ELASTICITY(r6,c0-9)
+//   DOWN:   2=FOREX(c1,r1-5), 6=LIBOR(c7,r5-9)
+//
+// ★ Extraction cells spell MONEY (the universal language of economics):
+//   M = r2c0  (MONETARY[0])
+//   O = r2c1  (MONETARY[1] / FOREX intersection)
+//   N = r4c3  (KEYNESIAN[3])
+//   E = r6c0  (ELASTICITY[0])
+//   Y = r6c9  (ELASTICITY[9])
+//
+// Full verified grid:
+//        c0   c1   c2   c3   c4   c5   c6   c7   c8   c9
+// r0: [  F ][ I ][ S ][ C ][ A ][ L ][ . ][ . ][ . ][ . ]  1-Across FISCAL
+// r1: [  . ][ F ][ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ]  2-Down FOREX(F)
+// r2: [ M★][ O★][ N ][ E ][ T ][ A ][ R ][ Y ][ . ][ . ]  3-Across MONETARY, M★O★, FOREX(O)
+// r3: [  . ][ R ][ . ][ . ][ . ][ . ][ . ][ . ][ . ][ . ]  2-Down FOREX(R)
+// r4: [  K ][ E ][ Y ][ N★][ E ][ S ][ I ][ A ][ N ][ . ]  5-Across KEYNESIAN, N★, FOREX(E)
+// r5: [  . ][ X ][ . ][ . ][ . ][ . ][ . ][ L ][ . ][ . ]  2-Down FOREX(X), 6-Down LIBOR(L)
+// r6: [ E★][ L ][ A ][ S ][ T ][ I ][ C ][ I ][ T ][ Y★]  7-Across ELASTICITY, E★Y★, LIBOR(I)
+// r7: [  . ][ . ][ . ][ . ][ . ][ . ][ . ][ B ][ . ][ . ]  6-Down LIBOR(B)
+// r8: [  . ][ . ][ . ][ . ][ . ][ . ][ . ][ O ][ . ][ . ]  6-Down LIBOR(O)
+// r9: [  . ][ . ][ . ][ . ][ . ][ . ][ . ][ R ][ . ][ . ]  6-Down LIBOR(R)
+//
+// FOREX down c1 r1-r5: F(r1),O(r2)✓[MONETARY[1]], R(r3), E(r4)✓[KEYNESIAN[1]], X(r5)
+// LIBOR down c7 r5-r9: L(r5), I(r6)✓[ELASTICITY[7]], B(r7), O(r8), R(r9)
+
+function drawXword(){
+  // 0=black, 1=white(filled), 2=★ highlighted
+  const GRID=[
+    //c0  c1  c2  c3  c4  c5  c6  c7  c8  c9
+    [ 1,  1,  1,  1,  1,  1,  0,  0,  0,  0],  // r0: FISCAL
+    [ 0,  1,  0,  0,  0,  0,  0,  0,  0,  0],  // r1: F(FOREX)
+    [ 2,  2,  1,  1,  1,  1,  1,  1,  0,  0],  // r2: MONETARY, M★O★
+    [ 0,  1,  0,  0,  0,  0,  0,  0,  0,  0],  // r3: R(FOREX)
+    [ 1,  1,  1,  2,  1,  1,  1,  1,  1,  0],  // r4: KEYNESIAN, N★
+    [ 0,  1,  0,  0,  0,  0,  0,  1,  0,  0],  // r5: X(FOREX), L(LIBOR)
+    [ 2,  1,  1,  1,  1,  1,  1,  1,  1,  2],  // r6: ELASTICITY, E★Y★
+    [ 0,  0,  0,  0,  0,  0,  0,  1,  0,  0],  // r7: B(LIBOR)
+    [ 0,  0,  0,  0,  0,  0,  0,  1,  0,  0],  // r8: O(LIBOR)
+    [ 0,  0,  0,  0,  0,  0,  0,  1,  0,  0],  // r9: R(LIBOR)
+  ];
+
+  const LETTERS=[
+    ['F','I','S','C','A','L',null,null,null,null],
+    [null,'F',null,null,null,null,null,null,null,null],
+    ['M','O','N','E','T','A','R','Y',null,null],
+    [null,'R',null,null,null,null,null,null,null,null],
+    ['K','E','Y','N','E','S','I','A','N',null],
+    [null,'X',null,null,null,null,null,'L',null,null],
+    ['E','L','A','S','T','I','C','I','T','Y'],
+    [null,null,null,null,null,null,null,'B',null,null],
+    [null,null,null,null,null,null,null,'O',null,null],
+    [null,null,null,null,null,null,null,'R',null,null],
+  ];
+
+  // Clue numbers at the FIRST cell of each word:
+  // 1: r0c0 (FISCAL across)
+  // 2: r1c1 (FOREX down — F is at r1c1)
+  // 3: r2c0 (MONETARY across)
+  // 5: r4c0 (KEYNESIAN across)
+  // 6: r5c7 (LIBOR down — L is at r5c7)
+  // 7: r6c0 (ELASTICITY across)
+  const CNUM_MAP={
+    '0,0':1,
+    '1,1':2,
+    '2,0':3,
+    '4,0':5,
+    '5,7':6,
+    '6,0':7,
+  };
+
+  const grd=document.getElementById('xgrid');
+  if(!grd)return;
+  grd.innerHTML='';
+
+  GRID.forEach((row,ri)=>{
+    const rowEl=document.createElement('div');rowEl.className='xword-row';
+    row.forEach((typ,ci)=>{
+      const el=document.createElement('div');
+      const key=`${ri},${ci}`;
+      const letter=LETTERS[ri][ci];
+
+      if(typ===0){
+        el.className='xw-cell blk';
+      } else if(typ===2){
+        // ★ highlighted — show ? to hide the letter
+        el.className='xw-cell hi';
+        const star=document.createElement('span');
+        star.style.cssText='position:absolute;bottom:2px;right:3px;font-size:7px;opacity:.8;color:var(--cy)';
+        star.textContent='★';
+        el.appendChild(star);
+        el.appendChild(document.createTextNode('?'));
+        el.style.color='rgba(24,212,192,.35)';
+      } else {
+        el.className='xw-cell wht';
+        if(letter)el.appendChild(document.createTextNode(letter));
+      }
+
+      if(CNUM_MAP[key]){
+        const n=document.createElement('span');n.className='xw-num';
+        n.textContent=CNUM_MAP[key];
+        el.insertBefore(n,el.firstChild);
+      }
+      rowEl.appendChild(el);
+    });
+    grd.appendChild(rowEl);
+  });
+}
+
+
+window.addEventListener('load', ()=>{
+  drawNewspaper();
+  window.addEventListener('resize',()=>{
+    if(G.cur==='p1')drawNewspaper();
+    if(G.cur==='p2')drawXword();
+  });
+});
+</script>
+</body>
+</html>
